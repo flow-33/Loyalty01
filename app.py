@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request, render_template
 from flask_cors import CORS
 from datetime import datetime
+import os
 import json
 
 app = Flask(__name__)
@@ -19,7 +20,15 @@ class User:
         self.tier = 'Bronze'
         self.history = []
         self.current_month = datetime.now().month
+        self.redeemed_rewards = []
+        self.last_tier = 'Bronze'
 
+    def check_tier_up(self):
+        old_tier = self.last_tier
+        new_tier = self.tier
+        self.last_tier = new_tier
+        return old_tier != new_tier
+    
     def reset_monthly_stats(self):
         self.monthly_spent = 0
         self.flights_this_month = 0
@@ -97,12 +106,15 @@ def simulate_transaction():
     user.monthly_spent += amount
     
     # Update tier
+    old_tier = user.tier
     if user.total_spent >= 10000:
         user.tier = 'Platinum'
     elif user.total_spent >= 5000:
         user.tier = 'Gold'
     elif user.total_spent >= 1000:
         user.tier = 'Silver'
+
+    tier_changed = old_tier != user.tier
     
     # Add to history
     user.history.append({
@@ -111,6 +123,33 @@ def simulate_transaction():
         'category': category,
         'pointsEarned': earned_points,
         'tier': user.tier
+    })
+    
+    return jsonify({
+        **user.to_dict(),
+        'tierUp' : tier_changed,
+        'newTier' : user.tier if tier_changed else None
+    })
+
+@app.route('/api/redeem', methods=['POST'])
+def redeem_reward():
+    data = request.json
+    user_id = data.get('userId', 'default')
+    points_cost = data.get('points', 0)
+    reward_name = data.get('rewardName', '')
+    
+    if user_id not in users:
+        return jsonify({'error': 'User not initialized'}), 404
+    
+    user = users[user_id]
+    if user.points < points_cost:
+        return jsonify({'error': 'Not enough points'}), 400
+    
+    user.points -= points_cost
+    user.redeemed_rewards.append({
+        'name': reward_name,
+        'cost': points_cost,
+        'date': datetime.now().strftime('%Y-%m-%d %H:%M')
     })
     
     return jsonify(user.to_dict())
@@ -126,5 +165,24 @@ def advance_month():
     users[user_id].reset_monthly_stats()
     return jsonify(users[user_id].to_dict())
 
+@app.route('/history')
+def history():
+    return render_template('history.html')
+
+@app.route('/rewards')
+def rewards():
+    return render_template('rewards.html')
+
+@app.route('/api/user/<user_id>')
+def get_user(user_id):
+    if user_id not in users:
+        users[user_id] = User(1000)  # Default budget
+    return jsonify(users[user_id].to_dict())
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Use environment variable to detect if we're running on Railway
+    if os.getenv('RAILWAY_ENVIRONMENT'):
+        app.run(host='0.0.0.0', port=os.getenv('PORT', 8080))
+    else:
+        # Local development
+        app.run(debug=True, port=5000)
