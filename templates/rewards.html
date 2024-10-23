@@ -35,14 +35,19 @@
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center space-x-3">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" 
-                         alt="User Avatar" 
-                         class="w-10 h-10 rounded-full border-2 border-gray-200"
-                    />
+                    <a href="/profile">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" 
+                             alt="User Avatar" 
+                             class="w-10 h-10 rounded-full border-2 border-gray-200 hover:border-blue-500 transition-colors cursor-pointer"
+                        />
+                    </a>
                     <div class="flex flex-col">
                         <span id="navTier" class="font-semibold text-sm"></span>
                         <span id="navPoints" class="text-sm text-gray-600"></span>
                     </div>
+                </div>
+                <div>
+                    <span id="gameTime" class="text-sm text-gray-600">Year 1, Month 1</span>
                 </div>
             </div>
         </div>
@@ -54,24 +59,24 @@
             <div id="rewardsContainer" class="col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </div>
     </div>
-    <footer class="sticky-footer shadow-lg"></footer>
+    <footer class="sticky-footer shadow-lg">
         <div class="container mx-auto px-4">
-            <div class="flex justify-around items-center h-16">
-                <a href="/" class="flex flex-col items-center p-2 ${currentPage === 'dashboard' ? 'text-blue-500' : 'text-gray-600'}">
+            <div class="flex justify-around items-center h-16 bg-white">
+                <a href="/" class="flex flex-col items-center p-2 text-gray-600">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                     </svg>
                     <span class="text-xs mt-1">Dashboard</span>
                 </a>
                 
-                <a href="/history" class="flex flex-col items-center p-2 ${currentPage === 'history' ? 'text-blue-500' : 'text-gray-600'}">
+                <a href="/history" class="flex flex-col items-center p-2 text-gray-600">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                     <span class="text-xs mt-1">History</span>
                 </a>
-
-                <a href="/rewards" class="flex flex-col items-center p-2 ${currentPage === 'rewards' ? 'text-blue-500' : 'text-gray-600'}">
+    
+                <a href="/rewards" class="flex flex-col items-center p-2 text-gray-600">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
                     </svg>
@@ -99,6 +104,9 @@
             
             document.getElementById('navPoints').textContent = `${userData.points} Points`;
             document.getElementById('navTier').textContent = userData.tier;
+            const year = Math.floor((userData.gameMonth || 1) / 12) + 1;  
+            const month = ((userData.gameMonth || 1) % 12) || 12;         
+            document.getElementById('gameTime').textContent = `Year ${year}, Month ${month}`;
             
             const rewardsHtml = rewards.map(reward => `
                 <div class="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform hover:scale-105">  <!-- Added transition effect -->

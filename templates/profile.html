@@ -3,32 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transaction History - Loyalty Program</title>
+    <title>Profile - Loyalty Program</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <style>
-        body {
-            padding-bottom: 64px; /* Height of the footer */
-            min-height: 100vh;
-            position: relative;
-        }
-        .sticky-header {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            background-color: white;
-        }
-        .sticky-footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 50;
-            background-color: white;
-        }
-    </style>
+    <!-- Include the same style section as above -->
 </head>
+<style>
+    body {
+        min-height: 100vh;
+        margin: 0;
+        padding-bottom: 4rem; /* Height of the footer */
+        display: flex;
+        flex-direction: column;
+    }
+    .sticky-header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background-color: white;
+    }
+    .sticky-footer {
+        position: fixed;  /* Changed from sticky to fixed */
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 4rem;
+        z-index: 50;
+        background-color: white;
+        border-top: 1px solid #e5e7eb;
+    }
+    .main-content {
+        flex: 1;
+        margin-bottom: 1rem;
+    }
+</style>
 <body class="bg-gray-100">
-    <!-- Navigation -->
+    <!-- Same header as other pages -->
     <header class="sticky-header shadow-lg">
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between h-16">
@@ -51,14 +60,45 @@
         </div>
     </header>
 
-    <div class="container mx-auto p-4 max-w-2xl">
-        <div class="bg-white rounded-lg shadow p-6">
-            <h1 class="text-2xl font-bold mb-4">Transaction History</h1>
-            <div id="fullHistory" class="space-y-3">
-                <!-- History will be populated here -->
+    <div class="main-content container mx-auto p-4 max-w-2xl">
+        <div class="bg-white rounded-lg shadow p-6 mb-4">
+            <div class="flex items-center space-x-4 mb-6">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" 
+                     alt="User Avatar" 
+                     class="w-20 h-20 rounded-full border-2 border-gray-200"
+                />
+                <div>
+                    <h1 id="userTier" class="text-2xl font-bold"></h1>
+                    <p id="userPoints" class="text-gray-600"></p>
+                </div>
             </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-gray-50 p-4 rounded">
+                    <h3 class="font-semibold text-gray-600">Total Spent</h3>
+                    <p id="totalSpent" class="text-2xl font-bold"></p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded">
+                    <h3 class="font-semibold text-gray-600">Monthly Budget</h3>
+                    <p id="monthlyBudget" class="text-2xl font-bold"></p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded">
+                    <h3 class="font-semibold text-gray-600">Rewards Redeemed</h3>
+                    <p id="rewardsRedeemed" class="text-2xl font-bold">0</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded">
+                    <h3 class="font-semibold text-gray-600">Current Month</h3>
+                    <p id="currentMonth" class="text-2xl font-bold"></p>
+                </div>
+            </div>
+
+            <button onclick="resetGame()" 
+                    class="w-full py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                Reset Game
+            </button>
         </div>
     </div>
+
     <footer class="sticky-footer shadow-lg">
         <div class="container mx-auto px-4">
             <div class="flex justify-around items-center h-16 bg-white">
@@ -85,53 +125,45 @@
             </div>
         </div>
     </footer>
-
     <script>
         let userId = 'user1';
 
-        async function loadHistory() {
+        async function loadProfile() {
             const response = await fetch(`/api/user/${userId}`);
             const data = await response.json();
             
+            // Update header info
             document.getElementById('navPoints').textContent = `${data.points} Points`;
             document.getElementById('navTier').textContent = data.tier;
+            
+            // Calculate and set game time once
             const year = Math.floor((data.gameMonth || 1) / 12) + 1;
             const month = ((data.gameMonth || 1) % 12) || 12;
             document.getElementById('gameTime').textContent = `Year ${year}, Month ${month}`;
             
-            const historyHtml = data.history.reverse().map(transaction => `
-                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <div class="font-medium">${transaction.category}</div>
-                            <div class="text-sm text-gray-500">${transaction.date}</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="font-medium">$${transaction.amount}</div>
-                            <div class="text-sm text-green-600">+${transaction.pointsEarned} points</div>
-                            <div class="text-xs text-gray-500">Tier: ${transaction.tier}</div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-            
-            document.getElementById('fullHistory').innerHTML = historyHtml;
+            // Update profile stats
+            document.getElementById('userTier').textContent = data.tier;
+            document.getElementById('userPoints').textContent = `${data.points} Points`;
+            document.getElementById('totalSpent').textContent = `$${data.totalSpent}`;
+            document.getElementById('monthlyBudget').textContent = `$${data.monthlyBudget}`;
+            document.getElementById('rewardsRedeemed').textContent = data.redeemed_rewards ? data.redeemed_rewards.length : 0;
+            document.getElementById('currentMonth').textContent = `Month ${month}`; // Use calculated month
         }
 
-        // Load history when page loads
-        loadHistory();
-    </script>
-    <script>
-        // Set current page in footer
-        const currentPage = 'dashboard'; // Change this to 'history' or 'rewards' for respective pages
-        
-        // Update the footer links
-        document.querySelectorAll('footer a').forEach(link => {
-            if (link.getAttribute('href') === window.location.pathname) {
-                link.classList.add('text-blue-500');
-                link.classList.remove('text-gray-600');
+        async function resetGame() {
+            if (confirm('Are you sure you want to reset the game? All progress will be lost.')) {
+                const response = await fetch('/api/reset', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId })
+                });
+                if (response.ok) {
+                    window.location.href = '/';
+                }
             }
-        });
+        }
+
+        loadProfile();
     </script>
 </body>
 </html>

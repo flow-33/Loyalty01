@@ -22,6 +22,7 @@ class User:
         self.current_month = datetime.now().month
         self.redeemed_rewards = []
         self.last_tier = 'Bronze'
+        self.gameMonth = 1
 
     def check_tier_up(self):
         old_tier = self.last_tier
@@ -42,7 +43,9 @@ class User:
             'monthlyBudget': self.monthly_budget,
             'flightsThisMonth': self.flights_this_month,
             'tier': self.tier,
-            'history': self.history
+            'history': self.history,
+            'gameMonth': self.gameMonth,
+            'redeemed_rewards': self.redeemed_rewards
         }
 
 @app.route('/')
@@ -154,6 +157,19 @@ def redeem_reward():
     
     return jsonify(user.to_dict())
 
+@app.route('/profile')
+def profile():
+    return render_template('profile.html')
+
+@app.route('/api/reset', methods=['POST'])
+def reset_user():
+    data = request.json
+    user_id = data.get('userId', 'default')
+
+    if user_id in users:
+        del users[user_id]
+    return jsonify({'status': 'success'})
+
 @app.route('/api/next-month', methods=['POST'])
 def advance_month():
     data = request.json
@@ -163,6 +179,7 @@ def advance_month():
         return jsonify({'error': 'User not initialized'}), 400
         
     users[user_id].reset_monthly_stats()
+    users[user_id].gameMonth += 1
     return jsonify(users[user_id].to_dict())
 
 @app.route('/history')
