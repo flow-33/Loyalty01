@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, send_from_directory
 from flask_cors import CORS
 from datetime import datetime
 import os
@@ -51,6 +51,10 @@ class User:
 @app.route('/')
 def home():
     return render_template('index.html')
+
+@app.route('/static/<path:path>')
+def send_static(path):
+    return send_from_directory('static', path)
 
 @app.route('/api/init', methods=['POST'])
 def initialize_user():

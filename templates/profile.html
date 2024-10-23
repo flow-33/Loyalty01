@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - Loyalty Program</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <!-- Include the same style section as above -->
+    <script src="{{ url_for('static', filename='js/tiers.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
 </head>
 <style>
     body {
@@ -92,6 +93,17 @@
                 </div>
             </div>
 
+            <div class="mb-6">
+                <h2 class="text-xl font-bold mb-4">Your Tier Benefits</h2>
+                <div id="tierBenefits" class="space-y-4 mb-6">
+                    <!-- Benefits will be populated here -->
+                </div>
+                
+                <div id="nextTierProgress" class="mb-6">
+                    <!-- Next tier progress will be shown here -->
+                </div>
+            </div>
+
             <button onclick="resetGame()" 
                     class="w-full py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
                 Reset Game
@@ -125,45 +137,5 @@
             </div>
         </div>
     </footer>
-    <script>
-        let userId = 'user1';
-
-        async function loadProfile() {
-            const response = await fetch(`/api/user/${userId}`);
-            const data = await response.json();
-            
-            // Update header info
-            document.getElementById('navPoints').textContent = `${data.points} Points`;
-            document.getElementById('navTier').textContent = data.tier;
-            
-            // Calculate and set game time once
-            const year = Math.floor((data.gameMonth || 1) / 12) + 1;
-            const month = ((data.gameMonth || 1) % 12) || 12;
-            document.getElementById('gameTime').textContent = `Year ${year}, Month ${month}`;
-            
-            // Update profile stats
-            document.getElementById('userTier').textContent = data.tier;
-            document.getElementById('userPoints').textContent = `${data.points} Points`;
-            document.getElementById('totalSpent').textContent = `$${data.totalSpent}`;
-            document.getElementById('monthlyBudget').textContent = `$${data.monthlyBudget}`;
-            document.getElementById('rewardsRedeemed').textContent = data.redeemed_rewards ? data.redeemed_rewards.length : 0;
-            document.getElementById('currentMonth').textContent = `Month ${month}`; // Use calculated month
-        }
-
-        async function resetGame() {
-            if (confirm('Are you sure you want to reset the game? All progress will be lost.')) {
-                const response = await fetch('/api/reset', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId })
-                });
-                if (response.ok) {
-                    window.location.href = '/';
-                }
-            }
-        }
-
-        loadProfile();
-    </script>
 </body>
 </html>
