@@ -1,137 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transaction History - Loyalty Program</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <style>
-        body {
-            padding-bottom: 64px; /* Height of the footer */
-            min-height: 100vh;
-            position: relative;
-        }
-        .sticky-header {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            background-color: white;
-        }
-        .sticky-footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 50;
-            background-color: white;
-        }
-    </style>
-</head>
-<body class="bg-gray-100">
-    <!-- Navigation -->
-    <header class="sticky-header shadow-lg">
-        <div class="container mx-auto px-4">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center space-x-3">
-                    <a href="/profile">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" 
-                             alt="User Avatar" 
-                             class="w-10 h-10 rounded-full border-2 border-gray-200 hover:border-blue-500 transition-colors cursor-pointer"
-                        />
-                    </a>
-                    <div class="flex flex-col">
-                        <span id="navTier" class="font-semibold text-sm"></span>
-                        <span id="navPoints" class="text-sm text-gray-600"></span>
-                    </div>
-                </div>
-                <div>
-                    <span id="gameTime" class="text-sm text-gray-600">Year 1, Month 1</span>
-                </div>
-            </div>
-        </div>
-    </header>
+{% extends "layout.html" %}
 
-    <div class="container mx-auto p-4 max-w-2xl">
-        <div class="bg-white rounded-lg shadow p-6">
-            <h1 class="text-2xl font-bold mb-4">Transaction History</h1>
-            <div id="fullHistory" class="space-y-3">
-                <!-- History will be populated here -->
-            </div>
+{% block title %}Transaction History{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-4 max-w-2xl">
+    <div class="bg-white rounded-lg shadow p-6">
+        <h1 class="text-2xl font-bold mb-4">Transaction History</h1>
+        <div id="fullHistory" class="space-y-3">
+            <!-- History will be populated here -->
         </div>
     </div>
-    <footer class="sticky-footer shadow-lg">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-around items-center h-16 bg-white">
-                <a href="/" class="flex flex-col items-center p-2 text-gray-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                    <span class="text-xs mt-1">Dashboard</span>
-                </a>
-                
-                <a href="/history" class="flex flex-col items-center p-2 text-gray-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    <span class="text-xs mt-1">History</span>
-                </a>
-    
-                <a href="/rewards" class="flex flex-col items-center p-2 text-gray-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                    </svg>
-                    <span class="text-xs mt-1">Rewards</span>
-                </a>
-            </div>
-        </div>
-    </footer>
-
-    <script>
-        let userId = 'user1';
-
-        async function loadHistory() {
-            const response = await fetch(`/api/user/${userId}`);
-            const data = await response.json();
-            
-            document.getElementById('navPoints').textContent = `${data.points} Points`;
-            document.getElementById('navTier').textContent = data.tier;
-            const year = Math.floor((data.gameMonth || 1) / 12) + 1;
-            const month = ((data.gameMonth || 1) % 12) || 12;
-            document.getElementById('gameTime').textContent = `Year ${year}, Month ${month}`;
-            
-            const historyHtml = data.history.reverse().map(transaction => `
-                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <div class="font-medium">${transaction.category}</div>
-                            <div class="text-sm text-gray-500">${transaction.date}</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="font-medium">$${transaction.amount}</div>
-                            <div class="text-sm text-green-600">+${transaction.pointsEarned} points</div>
-                            <div class="text-xs text-gray-500">Tier: ${transaction.tier}</div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-            
-            document.getElementById('fullHistory').innerHTML = historyHtml;
-        }
-
-        // Load history when page loads
-        loadHistory();
-    </script>
-    <script>
-        // Set current page in footer
-        const currentPage = 'dashboard'; // Change this to 'history' or 'rewards' for respective pages
-        
-        // Update the footer links
-        document.querySelectorAll('footer a').forEach(link => {
-            if (link.getAttribute('href') === window.location.pathname) {
-                link.classList.add('text-blue-500');
-                link.classList.remove('text-gray-600');
-            }
-        });
-    </script>
-</body>
-</html>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        await API.loadHistory();
+    } catch (error) {
+        console.error('Error loading history:', error);
+    }
+});
+</script>
+{% endblock %}

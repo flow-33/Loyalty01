@@ -1,305 +1,107 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loyalty Program</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
-    <script src="{{ url_for('static', filename='js/earn.js') }}"></script>
-    <style>
-        body {
-            padding-bottom: 64px; /* Height of the footer */
-            min-height: 100vh;
-            position: relative;
-        }
-        .sticky-header {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            background-color: white;
-        }
-        .sticky-footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 50;
-            background-color: white;
-        }
-    </style>
-</head>
-<body class="bg-gray-100">
-    <header class="sticky-header shadow-lg">
-        <div class="container mx-auto px-4">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center space-x-3">
-                    <a href="/profile">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" 
-                             alt="User Avatar" 
-                             class="w-10 h-10 rounded-full border-2 border-gray-200 hover:border-blue-500 transition-colors cursor-pointer"
-                        />
-                    </a>
-                    <div class="flex flex-col">
-                        <span id="navTier" class="font-semibold text-sm"></span>
-                        <span id="navPoints" class="text-sm text-gray-600"></span>
-                    </div>
+{% extends "layout.html" %}
+
+{% block title %}Loyalty Program{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<!-- Setup Screen -->
+<div id="setupScreen" class="container mx-auto p-4 max-w-xl">
+    <div class="bg-white rounded-lg shadow p-6">
+        <h1 class="text-2xl font-bold mb-6">Welcome to Loyalty Simulator</h1>
+        
+        <div class="mb-6">
+            <label for="playerName" class="block text-sm font-medium text-gray-700 mb-2">
+                What's your name?
+            </label>
+            <input type="text" 
+                   id="playerName" 
+                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                   placeholder="Enter your name">
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+                Choose your monthly budget
+            </label>
+            <div class="text-center text-2xl font-bold text-blue-600 mb-4">
+                $<span id="budgetValue">5000</span>
+            </div>
+            <input type="range" 
+                   id="budgetSlider"
+                   min="1000"
+                   max="10000"
+                   step="1000"
+                   value="5000"
+                   class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
                 </div>
-                <div>
-                    <span id="gameTime" class="text-sm text-gray-600">Year 1, Month 1</span>
+
+        <button onclick="startGame()" 
+                class="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+            Start Your Journey
+        </button>
+    </div>
+</div>
+
+<!-- Main Screen -->
+<div id="mainScreen" class="container mx-auto p-4 max-w-2xl hidden">
+    <div class="bg-white rounded-lg shadow">
+        <!-- Header Stats -->
+        <div class="p-4 border-b">
+            <div class="flex justify-between items-center mb-2">
+                <div class="flex items-center space-x-4">
+                    <div class="text-sm">Tier: <span id="currentTier" class="font-bold">Bronze</span></div>
+                    <div class="text-sm">Points: <span id="pointsBalance" class="font-bold">0</span></div>
                 </div>
+                <div class="text-sm text-gray-600">Total Spent: $<span id="totalSpent">0</span></div>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div id="monthlyProgress" class="bg-blue-600 h-2 rounded-full" style="width: 0%"></div>
+            </div>
+            <div class="flex justify-between text-sm mt-1">
+                <div>Monthly Spent: $<span id="monthlySpent">0</span></div>
+                <div>Budget: $<span id="monthlyBudget">1000</span></div>
             </div>
         </div>
-    </header>
-    <div id="setupScreen" class="container mx-auto p-4 max-w-xl">
-        <div class="bg-white rounded-lg shadow p-6">
-            <h1 class="text-2xl font-bold mb-4">Welcome to Loyalty Simulator</h1>
-            <p class="mb-4">Choose your monthly spending budget:</p>
-            <div class="grid grid-cols-2 gap-4">
-                <button onclick="initializeUser(1000)" class="p-4 bg-blue-500 text-white rounded hover:bg-blue-600">$1,000</button>
-                <button onclick="initializeUser(2000)" class="p-4 bg-blue-500 text-white rounded hover:bg-blue-600">$2,000</button>
-                <button onclick="initializeUser(5000)" class="p-4 bg-blue-500 text-white rounded hover:bg-blue-600">$5,000</button>
-                <button onclick="initializeUser(10000)" class="p-4 bg-blue-500 text-white rounded hover:bg-blue-600">$10,000</button>
+
+        <!-- Transaction Buttons -->
+        <div class="p-4">
+            <h2 class="font-bold mb-2">Credit Card Spending</h2>
+            <div class="text-xs text-gray-600 mb-2" id="creditCardRate">Earn 1x points</div>
+            <div class="flex space-x-2 mb-4">
+            <!-- Buttons will be added here by JavaScript -->
             </div>
+
+            <h2 class="font-bold mb-2">Flights (<span id="flightsLeft">2</span> remaining this month)</h2>
+            <div class="text-xs text-gray-600 mb-2" id="flightRate">Earn 2x points</div>
+            <div class="flex space-x-2">
+            <!-- Flight buttons will be added here by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Transaction History -->
+        <div class="p-4 border-t">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="font-bold">Recent Activity</h2>
+                <a href="/history" class="text-blue-500 hover:text-blue-700 text-sm">View All →</a>
+            </div>
+            <div id="history" class="space-y-2">
+                <!-- Only last 3 transactions will show here -->
+            </div>
+        </div>
+
+        <!-- Next Month Button -->
+        <div class="p-4 border-t bg-gray-50">
+            <button onclick="nextMonth()" class="w-full py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                Start Next Month
+            </button>
         </div>
     </div>
+</div>
+{% endblock %}
 
-    <div id="mainScreen" class="container mx-auto p-4 max-w-2xl hidden">
-        <div class="bg-white rounded-lg shadow">
-            <!-- Header Stats -->
-            <div class="p-4 border-b">
-                <div class="flex justify-between items-center mb-2">
-                    <div class="flex items-center space-x-4">
-                        <div class="text-sm">Tier: <span id="currentTier" class="font-bold">Bronze</span></div>
-                        <div class="text-sm">Points: <span id="pointsBalance" class="font-bold">0</span></div>
-                    </div>
-                    <div class="text-sm text-gray-600">Total Spent: $<span id="totalSpent">0</span></div>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-2">
-                    <div id="monthlyProgress" class="bg-blue-600 h-2 rounded-full" style="width: 0%"></div>
-                </div>
-                <div class="flex justify-between text-sm mt-1">
-                    <div>Monthly Spent: $<span id="monthlySpent">0</span></div>
-                    <div>Budget: $<span id="monthlyBudget">1000</span></div>
-                </div>
-            </div>
-
-            <!-- Transaction Buttons -->
-            <div class="p-4">
-                <h2 class="font-bold mb-2">Credit Card Spending</h2>
-                <div class="text-xs text-gray-600 mb-2" id="creditCardRate">Earn 1x points</div>
-                <div class="flex space-x-2 mb-4">
-                    <button onclick="simulateTransaction(50, 'creditCard')" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">$50</button>
-                    <button onclick="simulateTransaction(100, 'creditCard')" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">$100</button>
-                    <button onclick="simulateTransaction(200, 'creditCard')" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">$200</button>
-                </div>
-
-                <h2 class="font-bold mb-2">Flights (<span id="flightsLeft">2</span> remaining this month)</h2>
-                <div class="text-xs text-gray-600 mb-2" id="flightRate">Earn 2x points</div>
-                <div class="flex space-x-2">
-                    <button onclick="simulateTransaction(500, 'flights')" class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600">$500 Flight</button>
-                    <button onclick="simulateTransaction(1000, 'flights')" class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600">$1000 Flight</button>
-                </div>
-            </div>
-
-            <!-- Transaction History -->
-            <div class="p-4 border-t">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="font-bold">Recent Activity</h2>
-                    <a href="/history" class="text-blue-500 hover:text-blue-700 text-sm">View All →</a>
-                </div>
-                <div id="history" class="space-y-2">
-                    <!-- Only last 3 transactions will show here -->
-                </div>
-            </div>
-
-            <!-- Next Month Button -->
-            <div class="p-4 border-t bg-gray-50">
-                <button onclick="nextMonth()" class="w-full py-2 bg-green-500 text-white rounded hover:bg-green-600">
-                    Start Next Month
-                </button>
-            </div>
-        </div>
-    </div>
-    <footer class="sticky-footer shadow-lg">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-around items-center h-16 bg-white">
-                <a href="/" class="flex flex-col items-center p-2 text-gray-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                    <span class="text-xs mt-1">Dashboard</span>
-                </a>
-                
-                <a href="/history" class="flex flex-col items-center p-2 text-gray-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    <span class="text-xs mt-1">History</span>
-                </a>
-    
-                <a href="/rewards" class="flex flex-col items-center p-2 text-gray-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                    </svg>
-                    <span class="text-xs mt-1">Rewards</span>
-                </a>
-            </div>
-        </div>
-    </footer>
-
-<script>
-    let userId = 'user1';
-    
-    async function initializeUser(budget) {
-        const response = await fetch('/api/init', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId, monthlyBudget: budget })
-        });
-        const data = await response.json();
-        document.getElementById('setupScreen').classList.add('hidden');
-        document.getElementById('mainScreen').classList.remove('hidden');
-        updateDashboard(data);
-    }
-
-    async function simulateTransaction(amount, category) {
-        try {
-            const response = await fetch('/api/simulate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, amount, category })
-            });
-            
-            if (!response.ok) {
-                const error = await response.json();
-                alert(error.error);
-                return;
-            }
-            
-            const data = await response.json();
-            updateDashboard(data);
-
-            // Check for tier up after updating dashboard
-            if (data.tierUp) {
-                celebrateNewTier(data.newTier);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    }
-
-    async function nextMonth() {
-        const response = await fetch('/api/next-month', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId })
-        });
-        const data = await response.json();
-        updateDashboard(data);
-    }
-
-    function updateDashboard(data) {
-        // Update navigation bar stats
-        document.getElementById('navPoints').textContent = `${data.points} Points`;
-        document.getElementById('navTier').textContent = data.tier;
-        const year = Math.floor((data.gameMonth || 1) / 12) + 1;
-        const month = ((data.gameMonth || 1) % 12) || 12;
-        const creditCardEarning = earningRules.getEarningRate(data.tier, 'creditCard');
-        const flightEarning = earningRules.getEarningRate(data.tier, 'flights');
-        document.getElementById('gameTime').textContent = `Year ${year}, Month ${month}`;
-        
-        // Update main dashboard stats
-        document.getElementById('currentTier').textContent = data.tier;
-        document.getElementById('pointsBalance').textContent = data.points;
-        document.getElementById('totalSpent').textContent = data.totalSpent;
-        document.getElementById('monthlySpent').textContent = data.monthlySpent;
-        document.getElementById('monthlyBudget').textContent = data.monthlyBudget;
-        document.getElementById('flightsLeft').textContent = 2 - data.flightsThisMonth;
-        document.getElementById('creditCardRate').textContent = `Earn ${creditCardEarning}x points`;
-        document.getElementById('flightRate').textContent = `Earn ${flightEarning}x points`;
-        
-        // Update progress bar
-        const progress = (data.monthlySpent / data.monthlyBudget) * 100;
-        document.getElementById('monthlyProgress').style.width = `${progress}%`;
-
-        // Update recent transactions (showing only last 3)
-        const historyHtml = data.history.slice(-3).reverse().map(transaction => `
-            <div class="p-2 bg-gray-50 rounded flex justify-between items-center">
-                <div>
-                    <div class="font-medium">${transaction.category}: $${transaction.amount}</div>
-                    <div class="text-xs text-gray-500">${transaction.date}</div>
-                </div>
-                <div class="text-right">
-                    <div class="text-sm">+${transaction.pointsEarned} pts</div>
-                </div>
-            </div>
-        `).join('');
-        
-        document.getElementById('history').innerHTML = historyHtml;
-    }
-
-    function celebrateNewTier(newTier) {
-        // Customize confetti colors based on tier
-        const colors = {
-            'Silver': ['#C0C0C0', '#808080', '#FFFFFF'],
-            'Gold': ['#FFD700', '#DAA520', '#FFFFFF'],
-            'Platinum': ['#E5E4E2', '#FFFFFF', '#C0C0C0']
-        };
-
-        // Launch confetti
-        confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 },
-            colors: colors[newTier]
-        });
-
-        // Show celebration modal
-        const modal = document.createElement('div');
-        modal.className = 'fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-50';
-        modal.innerHTML = `
-            <div class="bg-white p-8 rounded-lg text-center">
-                <h2 class="text-2xl font-bold mb-4">Congratulations! 🎉</h2>
-                <p>You've reached ${newTier} tier!</p>
-                <button onclick="this.parentElement.parentElement.remove()" 
-                        class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                    Continue
-                </button>
-            </div>
-        `;
-        document.body.appendChild(modal);
-    }
-    async function checkExistingUser() {
-        try {
-            const response = await fetch(`/api/user/${userId}`);
-            const data = await response.json();
-            
-            if (data.totalSpent > 0 || data.monthlySpent > 0) {
-                // User exists and has activity, skip setup
-                document.getElementById('setupScreen').classList.add('hidden');
-                document.getElementById('mainScreen').classList.remove('hidden');
-                updateDashboard(data);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    }
-
-    // Call this when page loads
-    checkExistingUser();
-</script>
-<script>
-    // Set current page in footer
-    const currentPage = 'dashboard'; // Change this to 'history' or 'rewards' for respective pages
-    
-    // Update the footer links
-    document.querySelectorAll('footer a').forEach(link => {
-        if (link.getAttribute('href') === window.location.pathname) {
-            link.classList.add('text-blue-500');
-            link.classList.remove('text-gray-600');
-        }
-    });
-</script>
-</body>
-</html>
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

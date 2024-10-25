@@ -1,172 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rewards - Loyalty Program</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <!-- Add confetti animation library -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
-    <style>
-        body {
-            padding-bottom: 64px; /* Height of the footer */
-            min-height: 100vh;
-            position: relative;
-        }
-        .sticky-header {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            background-color: white;
-        }
-        .sticky-footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 50;
-            background-color: white;
-        }
-    </style>
-</head>
-<body class="bg-gray-100">
-    <!-- Same navigation as other pages -->
-    <header class="sticky-header shadow-lg">
-        <div class="container mx-auto px-4">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center space-x-3">
-                    <a href="/profile">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" 
-                             alt="User Avatar" 
-                             class="w-10 h-10 rounded-full border-2 border-gray-200 hover:border-blue-500 transition-colors cursor-pointer"
-                        />
-                    </a>
-                    <div class="flex flex-col">
-                        <span id="navTier" class="font-semibold text-sm"></span>
-                        <span id="navPoints" class="text-sm text-gray-600"></span>
-                    </div>
-                </div>
-                <div>
-                    <span id="gameTime" class="text-sm text-gray-600">Year 1, Month 1</span>
-                </div>
-            </div>
-        </div>
-    </header>
+{% extends "layout.html" %}
 
-    <div class="container mx-auto p-4 max-w-4xl">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+{% block title %}Rewards{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-4 max-w-4xl">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div id="rewardsContainer" class="col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <!-- Reward cards will be populated here -->
-            <div id="rewardsContainer" class="col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </div>
     </div>
-    <footer class="sticky-footer shadow-lg">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-around items-center h-16 bg-white">
-                <a href="/" class="flex flex-col items-center p-2 text-gray-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                    <span class="text-xs mt-1">Dashboard</span>
-                </a>
-                
-                <a href="/history" class="flex flex-col items-center p-2 text-gray-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    <span class="text-xs mt-1">History</span>
-                </a>
-    
-                <a href="/rewards" class="flex flex-col items-center p-2 text-gray-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                    </svg>
-                    <span class="text-xs mt-1">Rewards</span>
-                </a>
-            </div>
-        </div>
-    </footer>
+</div>
+{% endblock %}
 
-    <script>
-        const rewards = [
-            { id: 1, name: "10% Off Next Purchase", points: 500, image: "🏷️", description: "Get 10% off your next purchase" },
-            { id: 2, name: "Free Shipping", points: 1000, image: "📦", description: "Free shipping on your next order" },
-            { id: 3, name: "$50 Gift Card", points: 2500, image: "💳", description: "A $50 gift card for any purchase" },
-            { id: 4, name: "VIP Lounge Access", points: 5000, image: "🎭", description: "One-time access to VIP lounge" },
-            { id: 5, name: "Premium Membership", points: 10000, image: "👑", description: "1 month of premium membership" },
-            { id: 6, name: "Luxury Experience", points: 25000, image: "✨", description: "Exclusive luxury experience package" }
-        ];
-
-        let userId = 'user1';
-
-        async function loadRewards() {
-            const response = await fetch(`/api/user/${userId}`);
-            const userData = await response.json();
-            
-            document.getElementById('navPoints').textContent = `${userData.points} Points`;
-            document.getElementById('navTier').textContent = userData.tier;
-            const year = Math.floor((userData.gameMonth || 1) / 12) + 1;  
-            const month = ((userData.gameMonth || 1) % 12) || 12;         
-            document.getElementById('gameTime').textContent = `Year ${year}, Month ${month}`;
-            
-            const rewardsHtml = rewards.map(reward => `
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform hover:scale-105">  <!-- Added transition effect -->
-                    <div class="p-6 ${userData.points >= reward.points ? 'bg-green-50' : 'bg-gray-50'}">
-                        <div class="text-4xl mb-4 text-center">${reward.image}</div>
-                        <h3 class="text-lg font-bold mb-3">${reward.name}</h3>
-                        <p class="text-gray-600 text-sm mb-4">${reward.description}</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm font-semibold">${reward.points} Points</span>
-                            <button 
-                                onclick="redeemReward(${reward.points}, '${reward.name}')"
-                                class="px-4 py-2 rounded ${userData.points >= reward.points 
-                                    ? 'bg-green-500 hover:bg-green-600 text-white' 
-                                    : 'bg-gray-300 cursor-not-allowed'}"
-                                ${userData.points >= reward.points ? '' : 'disabled'}
-                            >
-                                Redeem
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-            
-            document.getElementById('rewardsContainer').innerHTML = rewardsHtml;
-        }
-
-        async function redeemReward(points, name) {
-            const response = await fetch('/api/redeem', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userId,
-                    points,
-                    rewardName: name
-                })
-            });
-            
-            if (response.ok) {
-                alert(`Successfully redeemed: ${name}`);
-                loadRewards();
-            } else {
-                alert('Failed to redeem reward');
-            }
-        }
-
-        loadRewards();
-    </script>
-    <script>
-        // Set current page in footer
-        const currentPage = 'dashboard'; // Change this to 'history' or 'rewards' for respective pages
-        
-        // Update the footer links
-        document.querySelectorAll('footer a').forEach(link => {
-            if (link.getAttribute('href') === window.location.pathname) {
-                link.classList.add('text-blue-500');
-                link.classList.remove('text-gray-600');
-            }
-        });
-    </script>
-</body>
-</html>
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/rewards.js') }}"></script>
+{% endblock %}

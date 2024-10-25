@@ -56,11 +56,16 @@ def home():
 def send_static(path):
     return send_from_directory('static', path)
 
+@app.route('/static/js/<path:filename>')
+def serve_static_js(filename):
+    return send_from_directory('static/js', filename)
+
 @app.route('/api/init', methods=['POST'])
 def initialize_user():
     data = request.json
     user_id = data.get('userId', 'default')
     monthly_budget = data.get('monthlyBudget', 1000)
+    print(f"POST /api/init for user {user_id} with budget {monthly_budget}")
     
     users[user_id] = User(monthly_budget)
     return jsonify(users[user_id].to_dict())
@@ -82,13 +87,13 @@ def simulate_transaction():
     if current_month != user.current_month:
         user.reset_monthly_stats()
 
-    # Validate transaction
+    # Validate transaction with clear error messages
     if user.monthly_spent + amount > user.monthly_budget:
-        return jsonify({'error': 'Exceeds monthly budget'}), 400
+        return jsonify({'error': f'Transaction of ${amount} would exceed your monthly budget of ${user.monthly_budget}'}), 400
         
     if category == 'flights':
         if user.flights_this_month >= 2:
-            return jsonify({'error': 'Flight limit reached this month'}), 400
+            return jsonify({'error': 'You have reached the limit of 2 flights this month'}), 400
         user.flights_this_month += 1
 
     # Calculate points
@@ -196,9 +201,13 @@ def rewards():
 
 @app.route('/api/user/<user_id>')
 def get_user(user_id):
+    print(f"GET /api/user/{user_id}")
+    print("Current users:", list(users.keys()))
     if user_id not in users:
-        users[user_id] = User(1000)  # Default budget
-    return jsonify(users[user_id].to_dict())
+       return jsonify({'error': 'User not initialized'}), 404
+    else: 
+        print(f"Returning user {user_id}", users[user_id].to_dict())
+        return jsonify(users[user_id].to_dict())
 
 if __name__ == '__main__':
     # Use environment variable to detect if we're running on Railway
