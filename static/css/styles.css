@@ -21,3 +21,58 @@ body {
     flex: 1;
     margin-bottom: 1rem;
 }
+
+ /* Custom Swiper styles */
+ .flight-swiper {
+    padding: 10px 40px;
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+    color: #3B82F6; /* Tailwind blue-500 */
+}
+
+.swiper-button-next:after,
+.swiper-button-prev:after {
+    font-size: 20px;
+}
+
+.swiper-slide {
+    width: auto; /* Let slides be sized by content */
+}
+/* Swiper container styles */
+.flight-selector-container .swiper-container {
+    width: 100%;
+    overflow: hidden;
+    padding: 1rem 0;
+}
+
+/* Keep slides from overflowing */
+.flight-selector-container .swiper-slide {
+    width: auto;
+    max-width: calc(100% - 2rem);
+}
+
+/* Navigation button positioning */
+.flight-selector-container .swiper-button-next,
+.flight-selector-container .swiper-button-prev {
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2rem;
+    height: 2rem;
+}
+
+.flight-selector-container .swiper-button-prev {
+    left: 0;
+}
+
+.flight-selector-container .swiper-button-next {
+    right: 0;
+}
+
+/* Make navigation buttons smaller */
+.flight-selector-container .swiper-button-next:after,
+.flight-selector-container .swiper-button-prev:after {
+    font-size: 1rem;
+    font-weight: bold;
+}

@@ -1,6 +1,21 @@
 // Global state
 let buttonsInitialized = false;  // This flag to prevent duplicate initialization
 
+const flightOptions = [
+    { city: 'Paris', price: 1300 },
+    { city: 'London', price: 800 },
+    { city: 'New York', price: 3500 },
+    { city: 'Tokyo', price: 3200 },
+    { city: 'Sydney', price: 1300 },
+    { city: 'Rome', price: 900 },
+    { city: 'Dubai', price: 800 },
+    { city: 'Barcelona', price: 700 },
+    { city: 'Amsterdam', price: 600 },
+    { city: 'Seoul', price: 3500 },
+    { city: 'Prague', price: 400 },
+    { city: 'Jeddah', price: 300 },
+    { city: 'Istanbul', price: 1200 },
+]
 
 // UI Initialization Functions
 function initializeSlider() {
@@ -35,19 +50,48 @@ function initializeTransactionButtons() {
     }
 
     // Flight booking buttons
-    const flightContainer = document.querySelector('.flex.space-x-2:not(.mb-4)');
+    const flightContainer = document.querySelector('.flight-selector-container');
     if (flightContainer) {
-        flightContainer.innerHTML = ''; // Clear any existing content
-        const flightAmounts = [500, 1000];
-        flightAmounts.forEach(amount => {
-            const button = document.createElement('button');
-            button.className = 'px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors';
-            button.textContent = `$${amount} Flight`;
-            button.onclick = () => simulateTransaction(amount, 'flights');
-            flightContainer.appendChild(button);
+        // Swiper wrapper structure
+        flightContainer.innerHTML = `
+            <div class="swiper-container flight-swiper">
+                <div class="swiper-wrapper">
+                    ${flightOptions.map(flight => `
+                        <div class="swiper-slide">
+                            <button 
+                                onclick="simulateTransaction(${flight.price}, 'flights')"
+                                class="w-64 bg-blue-500 text-white rounded-lg p-6 hover:bg-blue-600 transition-colors"
+                            >
+                                <div class="text-2xl font-bold mb-2">${flight.city}</div>
+                                <div class="text-xl">$${flight.price.toLocaleString()}</div>
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-button-next"></div>
+            </div>
+        `;
+
+        // Initialize Swiper
+        new Swiper('.flight-swiper', {
+            slidesPerView: 'auto',
+            spaceBetween: 16,
+            loop: true,
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            // Enable smooth continuous scrolling
+            speed: 500,
+            grabCursor: true,
+            // Improve mobile touch sliding
+            touchEventsTarget: 'container',
+            // Center the slides
+            centeredSlides: true,
         });
     }
-
+    
     // Next month button
     const nextMonthButton = document.querySelector('.p-4.border-t.bg-gray-50');
     if (nextMonthButton) {
@@ -57,6 +101,7 @@ function initializeTransactionButtons() {
 
     buttonsInitialized = true;
 }
+
 
 // Game State Management Functions
 async function startGame() {
@@ -159,7 +204,6 @@ function updateHistory(history = []) {
         fullHistory.innerHTML = fullHistoryHtml;
     }
 }
-
 // Tier Celebration
 function celebrateNewTier(newTier) {
     // Create celebration overlay

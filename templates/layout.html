@@ -6,7 +6,9 @@
     <title>{% block title %}Loyalty Program{% endblock %}</title>
     {% block scripts%}
         <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css" />
         <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
         <script src="{{ url_for('static', filename='js/api.js') }}"></script>
         <script src="{{ url_for('static', filename='js/components.js') }}"></script>
         <script src="{{ url_for('static', filename='js/earn.js') }}"></script>
@@ -15,6 +17,10 @@
         <script src="{{ url_for('static', filename='js/badges.js') }}"></script>
         <script src="{{ url_for('static', filename='js/tiers.js') }}"></script>
         <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+        <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+        <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+        <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
     {% endblock %}
     {% block extra_head %}{% endblock %}
 </head>
