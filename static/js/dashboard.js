@@ -1,5 +1,6 @@
 // Global state
 let buttonsInitialized = false;  // This flag to prevent duplicate initialization
+let flightSwiper = null;
 
 const flightOptions = [
     { city: 'Paris', price: 1300 },
@@ -32,6 +33,58 @@ function initializeSlider() {
     }
 }
 
+function updateFlightCarousel(){
+    const flightContainer = document.querySelector('.flight-selector-container');
+    if (!flightContainer) return;
+
+    // Check remaining flights
+    const flightsLeft = parseInt(document.getElementById('flightsLeft').textContent || '0');
+    const isFlightsDisabled = flightsLeft <= 0;
+
+    // Destroy existing swiper instance if it exists
+    if (flightSwiper) {
+        flightSwiper.destroy();
+        flightSwiper = null;
+    }
+
+    flightContainer.innerHTML = `
+        <div class="swiper-container flight-swiper">
+            <div class="swiper-wrapper">
+                ${flightOptions.map(flight => `
+                    <div class="swiper-slide">
+                        <button 
+                            onclick="${isFlightsDisabled ? '' : `simulateTransaction(${flight.price}, 'flights')`}"
+                            class="w-64 bg-blue-500 text-white rounded-lg p-6 hover:bg-blue-600 transition-colors ${isFlightsDisabled ? 'opacity-50 cursor-not-allowed' : ''}"
+                            ${isFlightsDisabled ? 'disabled' : ''}
+                        >
+                            <div class="text-2xl font-bold mb-2">${flight.city}</div>
+                            <div class="text-xl">$${flight.price.toLocaleString()}</div>
+                        </button>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="swiper-button-prev ${isFlightsDisabled ? 'opacity-50' : ''}"></div>
+            <div class="swiper-button-next ${isFlightsDisabled ? 'opacity-50' : ''}"></div>
+        </div>
+    `;
+
+    // Initialize New Swiper
+    flightSwiper = new Swiper('.flight-swiper', {
+        slidesPerView: 'auto',
+        spaceBetween: 16,
+        loop: true,
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+        speed: 500,
+        grabCursor: !isFlightsDisabled,
+        touchEventsTarget: 'container',
+        centeredSlides: true,
+        enabled: !isFlightsDisabled,
+    });
+}
+
 function initializeTransactionButtons() {
     // Prevent duplicate initialization
     if (buttonsInitialized) return;
@@ -49,48 +102,8 @@ function initializeTransactionButtons() {
         });
     }
 
-    // Flight booking buttons
-    const flightContainer = document.querySelector('.flight-selector-container');
-    if (flightContainer) {
-        // Swiper wrapper structure
-        flightContainer.innerHTML = `
-            <div class="swiper-container flight-swiper">
-                <div class="swiper-wrapper">
-                    ${flightOptions.map(flight => `
-                        <div class="swiper-slide">
-                            <button 
-                                onclick="simulateTransaction(${flight.price}, 'flights')"
-                                class="w-64 bg-blue-500 text-white rounded-lg p-6 hover:bg-blue-600 transition-colors"
-                            >
-                                <div class="text-2xl font-bold mb-2">${flight.city}</div>
-                                <div class="text-xl">$${flight.price.toLocaleString()}</div>
-                            </button>
-                        </div>
-                    `).join('')}
-                </div>
-                <div class="swiper-button-prev"></div>
-                <div class="swiper-button-next"></div>
-            </div>
-        `;
-
-        // Initialize Swiper
-        new Swiper('.flight-swiper', {
-            slidesPerView: 'auto',
-            spaceBetween: 16,
-            loop: true,
-            navigation: {
-                nextEl: '.swiper-button-next',
-                prevEl: '.swiper-button-prev',
-            },
-            // Enable smooth continuous scrolling
-            speed: 500,
-            grabCursor: true,
-            // Improve mobile touch sliding
-            touchEventsTarget: 'container',
-            // Center the slides
-            centeredSlides: true,
-        });
-    }
+    // Initialise Flight Carousel
+    updateFlightCarousel();
 
     // Next month button
     const nextMonthButton = document.querySelector('.p-4.border-t.bg-gray-50');
@@ -151,6 +164,9 @@ async function simulateTransaction(amount, category) {
         const data = await API.post('simulate', { amount, category });
         await GameState.updateDashboard(data);
 
+        // Update flight carousel after each transaction
+        updateFlightCarousel();
+
         if (data.tierUp) {
             celebrateNewTier(data.newTier);
         }
@@ -161,12 +177,28 @@ async function simulateTransaction(amount, category) {
 }
 
 async function nextMonth() {
+    // Disable the button immediately to prevent double-clicks
+    const nextMonthButton = document.querySelector('.sticky-next-month');
+    if (nextMonthButton) {
+        nextMonthButton.onclick = null;
+        nextMonthButton.classList.add('opacity-50', 'cursor-not-allowed');
+    }
     try {
+        console.log('Advancing to next month');
         const data = await API.post('next-month', {});
+        console.log('Month Data received:', data);
         await GameState.updateDashboard(data);
+        // Update flight carousel after each month change
+        updateFlightCarousel();
     } catch (error) {
         console.error('Error advancing month:', error);
         alert('Failed to advance to next month');
+    } finally {
+        // Re-enable the button and restore the click handler
+        if (nextMonthButton) {
+            nextMonthButton.onclick = nextMonth;
+            nextMonthButton.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
     }
 }
 
