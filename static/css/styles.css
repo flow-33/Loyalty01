@@ -76,3 +76,13 @@ body {
     font-size: 1rem;
     font-weight: bold;
 }
+
+.sticky-next-month {
+    position: fixed;
+    bottom: 4rem; /* Height of the footer */
+    left: 0;
+    right: 0;
+    background-color: white;
+    border-top: 1px solid #e5e7eb;
+    z-index: 40; /* Below the footer's z-index of 50 */
+}

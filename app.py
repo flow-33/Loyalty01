@@ -23,6 +23,7 @@ class User:
         self.redeemed_rewards = []
         self.last_tier = 'Bronze'
         self.gameMonth = 1
+        self.playerName = None
 
     def check_tier_up(self):
         old_tier = self.last_tier
@@ -45,7 +46,8 @@ class User:
             'tier': self.tier,
             'history': self.history,
             'gameMonth': self.gameMonth,
-            'redeemed_rewards': self.redeemed_rewards
+            'redeemed_rewards': self.redeemed_rewards,
+            'playerName': self.playerName
         }
 
 @app.route('/')
@@ -63,11 +65,20 @@ def serve_static_js(filename):
 @app.route('/api/init', methods=['POST'])
 def initialize_user():
     data = request.json
+    print(f"Received POST /api/init with data: {data}")  #  Debug log
     user_id = data.get('userId', 'default')
     monthly_budget = data.get('monthlyBudget', 1000)
-    print(f"POST /api/init for user {user_id} with budget {monthly_budget}")
+    player_name = data.get('playerName')
+    print(f"POST /api/init for user {user_id} with budget {monthly_budget} and name '{player_name}'")  
     
+    user = User(monthly_budget)
     users[user_id] = User(monthly_budget)
+    if player_name:  # Only set if provided
+        user.playerName = player_name  
+    users[user_id] = user  
+    response_data = users[user_id].to_dict()
+    print(f"Returning user data: {response_data}")  #  Debug log
+
     return jsonify(users[user_id].to_dict())
 
 @app.route('/api/simulate', methods=['POST'])

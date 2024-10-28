@@ -7,13 +7,21 @@ const API = {
      async post(endpoint, data) {
         console.log(`API POST ${endpoint}`, data);
         try {
+            const requestData = {
+                 ...data,
+                 userId: this.userId
+                };
+
+            console.log('API.post requestData:', requestData);
+
             const response = await fetch(`/api/${endpoint}`, {
                 method: 'POST',
                 headers: this.headers,
-                body: JSON.stringify({ ...data, userId: this.userId })
+                body: JSON.stringify(requestData)
             });
             
             const responseData = await response.json();
+            console.log(`API POST ${endpoint} response:`, responseData);
             
             if (!response.ok) {
                 throw new Error(responseData.error || 'Request failed');

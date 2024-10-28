@@ -91,11 +91,11 @@ function initializeTransactionButtons() {
             centeredSlides: true,
         });
     }
-    
+
     // Next month button
     const nextMonthButton = document.querySelector('.p-4.border-t.bg-gray-50');
     if (nextMonthButton) {
-        nextMonthButton.className = 'p-4 border-t bg-gray-50 cursor-pointer hover:bg-gray-100 text-center transition-colors';
+        nextMonthButton.className = 'sticky-next-month p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 text-center transition-colors';
         nextMonthButton.onclick = nextMonth;
     }
 
@@ -119,11 +119,20 @@ async function startGame() {
         localStorage.removeItem('gameState');
         GameState.currentState = null;
 
+        // Debug log
+        console.log('Starting new game with:', {
+            name: name,
+            budget: budget
+        });
+
+    
         const data = await API.post('init', {
             monthlyBudget: budget,
             playerName: name
         });
 
+        // Store player's name
+        GameState.playerName = name;
         
         document.getElementById('setupScreen').classList.add('hidden');
         document.getElementById('mainScreen').classList.remove('hidden');

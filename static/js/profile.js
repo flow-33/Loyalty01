@@ -1,10 +1,14 @@
 let userId = 'user1';
 
 function updateProfileStats(data) {
-    // Update user tier display
+    // Update user name and tier display
     const userTier = document.getElementById('userTier');
     if (userTier) {
-        userTier.textContent = `${data.tier} Tier Member`;
+        const playerName = data.playerName || GameState.playerName || 'Player';
+        userTier.innerHTML = `
+        <div class="text-2xl font-bold mb-1">${playerName}</div>
+        <div class="text-xl">${data.tier} Tier Member</div>
+    `;
     }
 
     // Update stats in the grid

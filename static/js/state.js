@@ -1,6 +1,7 @@
 const GameState = {
     userId: localStorage.getItem('userId') || 'user1',
     currentState: null,
+    playerName: localStorage.getItem('playerName') || '',
     
     init() {
         console.log('GameState.init() called');
@@ -9,6 +10,15 @@ const GameState = {
             console.log('Setting initial userId in localStorage:', this.userId);
             localStorage.setItem('userId', this.userId);
         }
+
+        // Add player name initialization
+        if (!localStorage.getItem('playerName')) {
+            console.log('Setting initial playerName in localStorage:', this.playerName);
+            localStorage.setItem('playerName', this.playerName);
+        }else{
+            this.playerName = localStorage.getItem('playerName');
+        }
+        
         
         // Try to restore state from localStorage
         const savedState = localStorage.getItem('gameState');
@@ -20,7 +30,12 @@ const GameState = {
                 console.error('Error parsing saved state:', e);
             }
         }
-    },   
+    },
+    
+    setPlayerName(name) {
+        this.playerName = name;
+        localStorage.setItem('playerName', name);
+    },
 
     getCurrentState() {
         console.log('getCurrentState called, returning:', this.currentState);
@@ -36,6 +51,12 @@ const GameState = {
         }
         // Store the current state
         this.currentState = data;
+
+        // Update player name if it exists in the data
+        if (data.playerName) {
+            this.playerName = data.playerName;
+            localStorage.setItem('playerName', data.playerName);
+        }
         
         // Save state to localStorage
         localStorage.setItem('gameState', JSON.stringify(data));
