@@ -140,13 +140,21 @@ def simulate_transaction():
     tier_changed = old_tier != user.tier
     
     # Add to history
-    user.history.append({
+    transaction = {
         'date': datetime.now().strftime('%Y-%m-%d %H:%M'),
         'amount': amount,
         'category': category,
         'pointsEarned': earned_points,
         'tier': user.tier
-    })
+    }
+    # Add city for flight transactions
+    if category == 'flights':
+        # Extract city from the data
+        city = data.get('city', None)
+        if city:
+            transaction['city'] = city
+
+    user.history.append(transaction)
     
     return jsonify({
         **user.to_dict(),
@@ -176,6 +184,10 @@ def redeem_reward():
     })
     
     return jsonify(user.to_dict())
+
+@app.route('/badges')
+def badges():
+    return render_template('badges.html')
 
 @app.route('/profile')
 def profile():

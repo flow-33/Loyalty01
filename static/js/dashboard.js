@@ -161,14 +161,23 @@ async function startGame() {
 
 async function simulateTransaction(amount, category) {
     try {
-        const data = await API.post('simulate', { amount, category });
-        await GameState.updateDashboard(data);
+        let data = { amount, category };
+        
+        // Add city for flight transactions
+        if (category === 'flights') {
+            const activeSlide = flightSwiper.slides[flightSwiper.activeIndex];
+            const cityElement = activeSlide.querySelector('.text-2xl');
+            data.city = cityElement.textContent;
+        }
+        
+        const response = await API.post('simulate', data);
+        await GameState.updateDashboard(response);
 
         // Update flight carousel after each transaction
         updateFlightCarousel();
 
-        if (data.tierUp) {
-            celebrateNewTier(data.newTier);
+        if (response.tierUp) {
+            celebrateNewTier(response.newTier);
         }
     } catch (error) {
         alert(error.message);
