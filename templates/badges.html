@@ -36,20 +36,28 @@
 {% endblock %}
 
 {% block page_scripts %}
+<script src="/static/js/api.js"></script>
+<script src="/static/js/state.js"></script>
 <script src="/static/js/badges-system.js"></script>
 <script type="text/javascript">
-document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        const currentState = GameState.getCurrentState();
-        if (currentState) {
-            const badgeDisplay = document.getElementById('badgeDisplay');
-            if (badgeDisplay) {
-                BadgeSystem.renderBadges(badgeDisplay, currentState);
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            let userData = GameState.getCurrentState();
+            if (!userData) {
+                // If no current state, fetch from API
+                userData = await API.get(`user/${GameState.userId}`);
+                await GameState.updateDashboard(userData);
             }
+            
+            const badgeDisplay = document.getElementById('badgeDisplay');
+            if (badgeDisplay && window.BadgeSystem) {
+                window.BadgeSystem.renderBadges(badgeDisplay, userData);
+            } else {
+                console.error('Badge display element or BadgeSystem not found');
+            }
+        } catch (error) {
+            console.error('Error initializing badges page:', error);
         }
-    } catch (error) {
-        console.error('Error initializing badges page:', error);
-    }
-});
+    });
 </script>
 {% endblock %}

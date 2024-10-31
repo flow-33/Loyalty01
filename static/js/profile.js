@@ -76,6 +76,48 @@ function updateNextTierProgress(data) {
     `;
 }
 
+function updateBadgePreview(data) {
+    const previewContainer = document.getElementById('badgePreview');
+    if (!previewContainer) return;
+
+    const previewBadges = BadgeSystem.getPreviewBadges(data);
+    const stats = BadgeSystem.calculateBadgeStats(data);
+    
+    previewContainer.innerHTML = previewBadges.map(badge => {
+        const styles = CATEGORY_STYLES[badge.category];
+        const isUnlocked = badge.condition(stats);
+        const progress = (badge.progress(stats) / badge.requirement) * 100;
+        
+        return `
+            <div class="relative p-4 rounded-lg border-2 ${
+                isUnlocked 
+                    ? styles.activeBorder + ' ' + styles.activeBg 
+                    : 'border-gray-200 bg-gray-50'
+            }">
+                <div class="flex flex-col items-center text-center space-y-2">
+                    <div class="text-3xl mb-2">${badge.icon}</div>
+                    <div class="font-bold text-sm">${badge.name}</div>
+                    <div class="text-xs px-1.5 py-0.5 rounded-full bg-${badge.rarity.color}-100 text-${badge.rarity.color}-600">
+                        ${badge.rarity.label}
+                    </div>
+                    <div class="text-xs text-gray-600">${badge.description}</div>
+                    ${!isUnlocked && badge.requirement > 1 ? `
+                        <div class="w-full mt-2">
+                            <div class="w-full bg-gray-200 rounded-full h-1">
+                                <div class="${styles.progressBar} h-1 rounded-full transition-all duration-500"
+                                     style="width: ${progress}%"></div>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">
+                                ${badge.progress(stats)} / ${badge.requirement}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
 async function loadProfile() {
     try {
         const data = await API.get(`user/${GameState.userId}`);
@@ -85,6 +127,7 @@ async function loadProfile() {
         updateProfileStats(data);
         updateTierBenefits(data.tier);
         updateNextTierProgress(data);
+        updateBadgePreview(data);  // Add this line
     } catch (error) {
         console.error('Error loading profile:', error);
     }

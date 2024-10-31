@@ -36,7 +36,7 @@
 
         <div class="mb-6">
             <h2 class="text-xl font-bold mb-4">Your Tier Benefits</h2>
-            <div id="tierBenefits" class="space-y-4 mb-6">
+            <div id="tierBenefits" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                 <!-- Benefits will be populated here -->
             </div>
             
@@ -46,8 +46,10 @@
         </div>
 
         <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-bold">Your Progress</h3>
+            <h3 class="text-xl font-bold">Your Badges</h3>
             <a href="/badges" class="text-blue-500 hover:text-blue-700">View All Badges →</a>
+        </div>
+        <div id="badgePreview" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         </div>
 
         <button onclick="resetGame()" class="w-full py-3 bg-red-500 text-white rounded hover:bg-red-600 transition-colors">Reset Game</button>
@@ -56,5 +58,7 @@
 {% endblock %}
 
 {% block page_scripts %}
-<script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+<script src="/static/js/badges-system.js"></script>
+<script src="/static/js/tiers.js"></script>
+<script src="/static/js/profile.js"></script>
 {% endblock %}
