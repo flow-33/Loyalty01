@@ -5,22 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Loyalty Program{% endblock %}</title>
     {% block scripts%}
-        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css" />
-        <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
+        <!-- Core dependencies first -->
         <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+        <script>
+            // Verify API loaded and log any issues
+            (function checkAPI() {
+                console.log('API check after load:', {
+                    hasAPI: !!window.API,
+                    methods: window.API ? Object.keys(window.API) : [],
+                    userId: window.API ? window.API.userId : undefined,
+                    timestamp: new Date().toISOString()
+                });
+                
+                if (!window.API) {
+                    console.error('API failed to initialize properly');
+                }
+            })();
+        </script> 
+        <!-- Then state Management -->
+        <script src="{{ url_for('static', filename='js/state.js') }}"></script>
+        <!-- Other Utilities -->
         <script src="{{ url_for('static', filename='js/components.js') }}"></script>
         <script src="{{ url_for('static', filename='js/earn.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/state.js') }}"></script>
         <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/badges.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/badges-system.js') }}"></script>
         <script src="{{ url_for('static', filename='js/tiers.js') }}"></script>
         <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
         <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
         <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+        <!--
+        Commenting out Babel
         <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-
+        -->
+        <!-- External dependencies -->
+        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css" />
+        <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
+        
     {% endblock %}
     {% block extra_head %}{% endblock %}
 </head>
@@ -61,6 +83,12 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                     </svg>
                     <span class="text-xs mt-1">Dashboard</span>
+                </a>
+                <a href="/planes" class="flex flex-col items-center p-2 text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                    <span class="text-xs mt-1">Planes</span>
                 </a>
                 <a href="/history" class="flex flex-col items-center p-2 text-gray-600">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

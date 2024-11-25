@@ -1,4 +1,4 @@
-const API = {
+window.API = {
     userId:'user1',
     headers: {
         'Content-Type': 'application/json'
@@ -49,3 +49,9 @@ const API = {
         return response;
     }
 };
+
+console.log('API initialized:', {
+    hasAPI: !!window.API,
+    methods: Object.keys(window.API),
+    timestamp: new Date().toISOString()
+});

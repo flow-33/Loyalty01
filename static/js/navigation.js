@@ -159,3 +159,4 @@ window.navigateToDashboard = createNavigationHandler('/');
 window.navigateToHistory = createNavigationHandler('/history');
 window.navigateToRewards = createNavigationHandler('/rewards');
 window.navigateToProfile = createNavigationHandler('/profile');
+window.navigateToPlanes = createNavigationHandler('/planes');

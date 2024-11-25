@@ -56,11 +56,19 @@ def home():
 
 @app.route('/static/<path:path>')
 def send_static(path):
-    return send_from_directory('static', path)
-
-@app.route('/static/js/<path:filename>')
-def serve_static_js(filename):
-    return send_from_directory('static/js', filename)
+    print(f"Serving static file: {path}")
+    try:
+        if path.startswith('js/'):
+            return send_from_directory('static/js', path[3:])
+        return send_from_directory('static', path)
+    except Exception as e:
+        print(f"Error serving static file {path}: {e}")
+        return str(e), 500
+    
+# Removing this route to avoid potential conflicts with other routes
+#@app.route('/static/js/<path:filename>')
+#def serve_static_js(filename):
+#    return send_from_directory('static/js', filename)
 
 @app.route('/api/init', methods=['POST'])
 def initialize_user():
@@ -231,6 +239,10 @@ def get_user(user_id):
     else: 
         print(f"Returning user {user_id}", users[user_id].to_dict())
         return jsonify(users[user_id].to_dict())
+
+@app.route('/planes')
+def planes():
+    return render_template('planes.html')
 
 if __name__ == '__main__':
     # Use environment variable to detect if we're running on Railway

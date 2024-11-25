@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+{% block title %}Paper Planes{% endblock %}
+
+{% block content %}
+<div id="planesRoot"></div>
+{% endblock %}
+
+{% block page_scripts %}
+<!-- First check for API -->
+<script>
+// Quick API check with shorter timeout
+const checkAPI = (timeout = 3000) => {
+  console.log('[Planes Init] Starting API check');
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+    
+    const check = () => {
+      if (window.API && window.API.post && window.GameState) {
+        console.log('[Planes Init] Dependencies found in', Date.now() - start, 'ms');
+        resolve();
+        return;
+      }
+
+      if (Date.now() - start > timeout) {
+        console.error('[Planes Init] Timeout waiting for dependencies');
+        reject(new Error('API initialization timeout'));
+        return;
+      }
+
+      requestAnimationFrame(check);
+    };
+
+    check();
+  });
+};
+
+// Load planes.js immediately but initialize it after API check
+const loadPlanes = async () => {
+  try {
+    // Start loading planes.js right away
+    const script = document.createElement('script');
+    script.src = "{{ url_for('static', filename='js/planes.js') }}";
+    document.body.appendChild(script);
+
+    // Check for API in parallel
+    await checkAPI();
+    console.log('[Planes Init] Ready to initialize');
+  } catch (error) {
+    console.error('[Planes Init] Failed:', error);
+    document.getElementById('planesRoot').innerHTML = `
+      <div class="p-4 bg-red-100 text-red-700 rounded">
+        <p class="font-bold mb-2">Failed to initialize planes component</p>
+        <p class="text-sm">Error: ${error.message}</p>
+        <button 
+          onclick="window.location.reload()"
+          class="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+        >
+          Retry
+        </button>
+      </div>
+    `;
+  }
+};
+
+// Start loading immediately
+loadPlanes();
+</script>
+{% endblock %}
